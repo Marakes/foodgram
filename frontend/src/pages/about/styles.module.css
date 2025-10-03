@@ -1,76 +1,296 @@
-.content {
-  display: grid;
-  grid-template-columns: 1fr 300px;
-  text-align: left;
-  justify-content: space-between;
+/* ===== Шапка страницы ===== */
+.header {
+  margin: 72px 0 44px;                 /* больше воздуха сверху */
+  text-align: center;
 }
 
 .title {
-  font-family: "SF Pro Display", sans-serif;
-  font-style: normal;
-  font-weight: 600;
-  font-size: 54px;
-  line-height: 110%;
-  color: #000;
-  margin: 0 0 40px;
-  margin-top: 40px;
-  text-align: left;
+  font-family: "SF Pro Display", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  font-weight: 700;
+  font-size: clamp(32px, 5vw, 44px);
+  line-height: 1.1;
+  color: #111;
+  margin: 0;
 }
 
+.leadCentered {
+  margin: 16px auto 0;
+  color: #6b7280;
+  line-height: 1.65;
+  max-width: 75ch;
+  text-align: center;
+}
+
+/* ===== Двухколоночный контент ===== */
+.content {
+  display: grid;
+  grid-template-columns: minmax(0, 680px) 340px;
+  gap: 56px;                           /* чуть больше между колонками */
+  align-items: start;
+  /* убираем “провисание” низа: ограничим нижний отступ */
+  margin: 8px 0 48px;
+}
+
+/* левая колонка — как “карточка-колонка”, чтобы низ ровнее совпадал с FAQ */
+.mainCol {
+  display: grid;
+  gap: 24px;                            /* равномерные вертикальные интервалы */
+}
+
+/* ===== Заголовки и текст ===== */
 .subtitle {
-  font-family: "SF Pro Display", sans-serif;
-  font-style: normal;
-  font-weight: 600;
-  font-size: 32px;
-  line-height: 110%;
-  color: #000;
-  margin: 0 0 24px;
-}
-
-.additionalTitle {
-  font-family: "SF Pro Display", sans-serif;
-  font-style: normal;
-  font-weight: 600;
-  font-size: 24px;
-  line-height: 120%;
-  color: #000;
-  margin: 0 0 24px;
+  font-family: "SF Pro Display", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  font-weight: 700;
+  font-size: clamp(20px, 3vw, 26px);
+  line-height: 1.2;
+  color: #111;
+  margin: 8px 0 18px;
+  text-align: center;
 }
 
 .text {
-  font-family: "SF Pro Display", sans-serif;
-  font-style: normal;
+  font-family: "SF Pro Display", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
   font-weight: 500;
   font-size: 18px;
-  line-height: 130%;
-  color: #000;
+  line-height: 1.45;
+  color: #111;
 }
 
-.textItem {
-  margin: 0 0 16px;
-}
+.textItem { margin: 0 0 16px; }
 
 .textLink {
   color: #4a61dd;
   text-decoration: none;
 }
+.textLink:hover { text-decoration: underline; }
 
-@media screen and (max-width: 950px) {
+/* ===== Шаги ===== */
+.steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 14px;
+}
+
+.step {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  align-items: start;
+  gap: 12px;
+}
+
+.stepNum {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  font-weight: 700;
+  font-size: 14px;
+  background: #111;
+  color: #fff;
+}
+
+/* ===== Инфо-плашка ===== */
+.note {
+  padding: 14px 16px;
+  background: #f7f8fa;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  color: #4b5563;
+  text-align: center;
+}
+
+/* ===== Кнопки (два уровня) ===== */
+.ctaRow {
+  display: grid;
+  gap: 14px;
+}
+
+.ctaRowSplit .ctaTop {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  justify-items: stretch;
+}
+
+.ctaRowSplit .ctaBottom {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+.buttonPrimary,
+.buttonGhost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 46px;
+  padding: 0 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  text-decoration: none;
+  letter-spacing: .01em;
+}
+
+.buttonPrimary { background:#111; color:#fff; }
+.buttonPrimary:hover { background:#0d0d0d; }
+
+.buttonGhost {
+  border:1px solid #e5e7eb;
+  background:#fff;
+  color:#111;
+}
+.buttonGhost:hover { background:#f7f8fa; }
+
+/* ===== Боковая колонка ===== */
+.aside { min-width: 280px; }
+
+.additionalTitle {
+  font-weight: 700;
+  font-size: 22px;
+  margin: 0 0 10px;
+  text-align: center;
+}
+
+/* карточки в сайдбаре */
+.card {
+  background:#fff;
+  border:1px solid #e5e7eb;
+  border-radius:12px;
+  padding:18px;
+  margin-bottom: 24px;
+}
+
+/* ===== Ссылки: больше воздуха и центр ===== */
+.linksBlock {
+  display: grid;
+  gap: 18px;                 /* БОЛЬШЕ РАССТОЯНИЯ МЕЖДУ “Репозиторий” и “Автор” */
+  text-align: center;
+}
+
+.linksPair {
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+}
+
+.linksLabel {
+  color:#6b7280;
+  font-size: 15px;
+}
+
+/* ===== FAQ ===== */
+.faqItem + .faqItem { border-top:1px solid #f1f3f5; }
+.faqItem { padding:16px 6px; text-align: center; }
+.faqQ { font-weight: 650; margin-bottom: 6px; color:#111; }
+.faqA { color:#4b5563; line-height:1.55; }
+
+/* ===== Адаптив ===== */
+@media (max-width: 1100px) {
   .content {
     grid-template-columns: 1fr;
-    gap: 40px;
-    padding-bottom: 80px;
+    gap: 36px;              /* компактнее на узких экранах */
+    margin-bottom: 32px;    /* чтобы футер попадал в экран */
   }
+  .ctaRowSplit .ctaTop { grid-template-columns: 1fr; }
+}
 
-  .title {
-    font-size: 34px;
-  }
+@media (max-width: 700px) {
+  .leadCentered { padding: 0 10px; }
+  .buttonPrimary, .buttonGhost { width: 100%; }
+}
 
-  .subtitle {
-    font-size: 26px;
-  }
+/* ===== LINKS (Репозиторий / Автор) — больше воздуха и аккуратный ряд ===== */
+.aside .card {
+  display: grid;
+  gap: 14px;                 /* было 12 — стало чуть больше */
+  text-align: center;
+}
 
-  .additionalTitle {
-    font-size: 22px;
-  }
+.aside .card p {
+  /* превращаем строки “Репозиторий: <ссылка>” и “Автор: <ссылка>” в ряд с зазором */
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;                 /* << вот тут появляется воздух между словом и ссылкой */
+  margin: 0;                /* убираем лишние внешние отступы у <p> */
+  justify-content: center;  /* центрируем по карточке */
+}
+
+.aside .card p .textLink {
+  /* небольшое усиление кликабельности и визуального веса */
+  font-weight: 600;
+}
+
+/* маленькая подпись “Ссылки” — подчистим отступы сверху/снизу */
+.additionalTitle {
+  margin-top: 2px;
+  margin-bottom: 10px;      /* было 8 — слегка больше, чтобы не липло */
+}
+
+/* ===== CTA (кнопки) — два уровня и отступы от соседних блоков ===== */
+.ctaRow {
+  display: grid;
+  gap: 16px;                /* было 14 — чуть больше внутри блока */
+  margin: 10px 0 12px;      /* отодвинуть от шагов сверху и от плашки снизу */
+}
+
+.steps + .ctaRow {          /* точечный отступ именно после шагов */
+  margin-top: 14px;
+}
+
+.ctaRowSplit .ctaTop {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.ctaRowSplit .ctaBottom {
+  display: grid;
+  grid-template-columns: 1fr;
+}
+
+/* сами кнопки — делаем их немного выше, чтобы “звучали” и выглядели ровнее */
+.buttonPrimary,
+.buttonGhost {
+  height: 48px;             /* было 46 */
+  padding: 0 22px;          /* +2px по бокам */
+  border-radius: 10px;
+}
+
+/* ===== ВЫРАВНИВАНИЕ ЛЕВОЙ КОЛОНКИ С FAQ И УБОРКА НИЗА ===== */
+
+/* левая колонка как “вертикальная сетка” с ровными интервалами */
+.mainCol {
+  display: grid;
+  gap: 20px;                /* равномерно: заголовок, шаги, кнопки, плашка */
+}
+
+/* инфо-плашка — компактнее снизу, чтобы не “толкала” футер */
+.note {
+  margin: 6px 0 0;          /* сверху 6px, снизу 0 — убираем лишний низ */
+}
+
+/* общий нижний внешний отступ контента — еще меньше,
+   чтобы футер попадал в первый экран без прокрутки */
+.content {
+  margin: 8px 0 18px;       /* было 48 — стало 18 */
+}
+
+/* если на узких экранах футер всё ещё уезжает — поджимаем ещё сильнее */
+@media (max-width: 1100px) {
+  .content { margin-bottom: 14px; }
+  .ctaRow { margin: 10px 0 10px; }
+}
+
+/* ===== Дополнительная косметика заголовков/подзаголовков ===== */
+.subtitle {
+  margin: 6px 0 16px;       /* меньше снизу — чтобы шаги не прилипали и не “ехали” вниз */
+}
+
+.header {
+  margin: 64px 0 36px;      /* чуть компактнее сверху/снизу, чтобы балансировало с футером */
+}
+.leadCentered {
+  margin-top: 12px;         /* капля воздуха под заголовком */
 }

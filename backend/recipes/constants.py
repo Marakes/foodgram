@@ -1,0 +1,1 @@
+TRUNCATE_TEXT = 30
