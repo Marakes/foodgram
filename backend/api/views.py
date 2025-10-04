@@ -15,7 +15,9 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from api.filters import NameSearchFilter, RecipeFilter
+from api.filters import (
+    IngredientUniversalSearchFilter, RecipeFilter
+)
 from api.permissions import (
     IsAdminOrReadOnly,
     IsAuthorOrAdminOrReadOnly,
@@ -65,8 +67,7 @@ class IngredientViewSet(ReadOnlyBase):
     queryset = Ingredient.objects.all().order_by('name')
     serializer_class = IngredientSerializer
     # permission_classes = (IsAuthenticatedOrReadOnly,)
-    filter_backends = (NameSearchFilter,)
-    search_fields = ('^name',)
+    filter_backends = (IngredientUniversalSearchFilter,)
 
 
 class TagViewSet(ReadOnlyBase):
