@@ -1,7 +1,9 @@
+import base64
 from collections import defaultdict
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
+from django.core.files.base import ContentFile
 from django.db.models import (BooleanField, Exists, OuterRef, Prefetch,
                               Subquery, Value)
 from django.http import HttpResponse
@@ -152,26 +154,54 @@ class CustomUserViewSet(UserViewSet):
             return Response(data, status=status.HTTP_200_OK)
 
         if request.method == 'PUT':
-            if 'avatar' not in request.data:
-                return Response(
-                    {'avatar': ['Это поле обязательное!']},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+            data = request.data.get('avatar')
+            if not data:
+                return Response({'avatar': ['Это поле обязательное!']},
+                                status=status.HTTP_400_BAD_REQUEST)
+
             try:
-                serializer = self.get_serializer(
-                    user,
-                    data=request.data,
-                    # partial=False
-                )
-                serializer.is_valid(raise_exception=True)
-                serializer.save()
-            except ValidationError:
-                raise
-            except OSError:
-                raise ValidationError(
-                    {'avatar': ['Не удалось обработать фото']}
-                )
-            return Response(serializer.data, status=status.HTTP_200_OK)
+                if isinstance(data, str) and data.startswith('data:image'):
+                    header, b64 = data.split(';base64,', 1)
+                    ext = (header.split('/')[-1] or 'jpg').lower()
+                else:
+                    b64, ext = data, 'jpg'
+
+                raw = base64.b64decode(b64, validate=True)
+            except Exception:
+                raise ValidationError({
+                    'avatar': ['Не удалось обработать фото']
+                })
+
+            # сохраняем напрямую, минуя DRF ImageField validation
+            filename = f'avatar_{user.pk}.{ext}'
+            user.avatar.save(filename, ContentFile(raw), save=True)
+
+            absolute_url = request.build_absolute_uri(user.avatar.url)
+            return Response(
+                {'avatar': absolute_url}, status=status.HTTP_200_OK
+            )
+
+        # if request.method == 'PUT':
+        #     if 'avatar' not in request.data:
+        #         return Response(
+        #             {'avatar': ['Это поле обязательное!']},
+        #             status=status.HTTP_400_BAD_REQUEST
+        #         )
+        #     try:
+        #         serializer = self.get_serializer(
+        #             user,
+        #             data=request.data,
+        #             # partial=False
+        #         )
+        #         serializer.is_valid(raise_exception=True)
+        #         serializer.save()
+        #     except ValidationError:
+        #         raise
+        #     except OSError:
+        #         raise ValidationError(
+        #             {'avatar': ['Не удалось обработать фото']}
+        #         )
+        #     return Response(serializer.data, status=status.HTTP_200_OK)
 
         if request.method == 'DELETE':
             if user.avatar:
