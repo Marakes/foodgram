@@ -14,13 +14,8 @@ from django.urls import include, path
 # from rest_framework_nested.routers import DefaultRouter
 from rest_framework.routers import DefaultRouter
 
-from api.views import (
-    CustomUserViewSet,
-    IngredientViewSet,
-    RecipeViewSet,
-    TagViewSet
-)
-
+from api.views import (CustomUserViewSet, IngredientViewSet, RecipeViewSet,
+                       TagViewSet)
 
 v1_router = DefaultRouter(trailing_slash='/?')
 v1_router.register(r'ingredients', IngredientViewSet, basename='ingredient')

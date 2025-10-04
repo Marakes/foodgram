@@ -2,9 +2,8 @@ from collections import defaultdict
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
-from django.db.models import (
-    BooleanField, Exists, OuterRef, Prefetch, Subquery, Value
-)
+from django.db.models import (BooleanField, Exists, OuterRef, Prefetch,
+                              Subquery, Value)
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django_filters.rest_framework import DjangoFilterBackend
@@ -15,30 +14,16 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from api.filters import (
-    IngredientUniversalSearchFilter, RecipeFilter
-)
-from api.permissions import (
-    IsAdminOrReadOnly,
-    IsAuthorOrAdminOrReadOnly,
-)
-from api.serializers import (
-    AvatarUpdateSerializer,
-    IngredientSerializer,
-    RecipeReadSerializer,
-    RecipeShortSerializer,
-    RecipeWriteSerializer,
-    SubscribeSerializer,
-    TagSerializer,
-    UserCreateSerializer,
-)
+from api.filters import IngredientUniversalSearchFilter, RecipeFilter
+from api.permissions import IsAdminOrReadOnly, IsAuthorOrAdminOrReadOnly
+from api.serializers import (AvatarUpdateSerializer, IngredientSerializer,
+                             RecipeReadSerializer, RecipeShortSerializer,
+                             RecipeWriteSerializer, SubscribeSerializer,
+                             TagSerializer, UserCreateSerializer)
 from api.utils import generate_code
-from recipes.models import (
-    Favorite, Ingredient, Recipe,
-    ShoppingCart, ShortLink, Tag
-)
+from recipes.models import (Favorite, Ingredient, Recipe, ShoppingCart,
+                            ShortLink, Tag)
 from users.models import Subscribe
-
 
 User = get_user_model()
 

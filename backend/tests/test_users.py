@@ -2,6 +2,7 @@ import pytest
 from django.contrib.auth import get_user_model
 
 from .conftest import create_recipe
+
 # from recipes.models import Subscribe
 
 User = get_user_model()

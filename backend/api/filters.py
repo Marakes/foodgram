@@ -1,11 +1,12 @@
 import operator
 import re
+from functools import reduce
+
 import django_filters
 from django.db.models import Case, IntegerField, Q, Subquery, Sum, Value, When
-from functools import reduce
 from rest_framework import filters
 
-from recipes.models import Recipe, Tag, Favorite, ShoppingCart
+from recipes.models import Favorite, Recipe, ShoppingCart, Tag
 
 
 class RecipeFilter(django_filters.FilterSet):
@@ -132,7 +133,7 @@ class IngredientUniversalSearchFilter(filters.SearchFilter):
 
     search_param = "name"
 
-    # делаем собственный парсинг термов — игнорируем дефисы/подчёркивания и т.п.
+    # делаем собственный парсинг — игнорируем дефисы/подчёркивания и т.п.
     def get_search_terms(self, request):
         raw = request.query_params.get(self.search_param, "") or ""
         cleaned = re.sub(r"[-_.,;:/\\|]+", " ", raw, flags=re.U)
@@ -166,7 +167,7 @@ class IngredientUniversalSearchFilter(filters.SearchFilter):
                 )
             )
 
-        # аккуратно складываем выражения (+ поддерживает сложение Case-выражений)
+        # аккуратно складываем выражения (+ сложение Case-выражений)
         total_score = reduce(operator.add, score_exprs)
 
         return (

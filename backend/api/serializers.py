@@ -8,11 +8,9 @@ from django.core.files.base import ContentFile
 from django.db import transaction
 from rest_framework import serializers
 
-from recipes.models import (
-    Favorite, Ingredient, Recipe, RecipeIngredient, ShoppingCart, Tag
-)
+from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
+                            ShoppingCart, Tag)
 from users.models import Subscribe
-
 
 User = get_user_model()
 
@@ -53,7 +51,9 @@ User = get_user_model()
 #             try:
 #                 decoded = base64.b64decode(b64data, validate=True)
 #             except (B64Error, ValueError):
-#                 raise serializers.ValidationError('Не удалось обработать фото')
+#                 raise serializers.ValidationError(
+#                     'Не удалось обработать фото'
+#                 )
 #
 #             file = ContentFile(decoded, name=f'upload.{ext}')
 #             return super().to_internal_value(file)
@@ -81,10 +81,12 @@ class ImageBase64(serializers.FileField):
                 try:
                     header, b64data = data.split('base64,', 1)
                 except ValueError:
-                    raise serializers.ValidationError('Не удалось обработать фото')
+                    raise serializers.ValidationError(
+                        'Не удалось обработать фото'
+                    )
                 # пытаемся вытащить расширение из mime
                 try:
-                    mime = header.split(':', 1)[1].split(';', 1)[0]  # image/png
+                    mime = header.split(':', 1)[1].split(';', 1)[0]
                     ext = (mime.split('/', 1)[1] or 'jpg').lower()
                 except Exception:
                     ext = 'jpg'

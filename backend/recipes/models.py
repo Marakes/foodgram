@@ -5,7 +5,6 @@ from django.utils.text import Truncator
 
 from recipes.constants import TRUNCATE_TEXT
 
-
 User = get_user_model()
 
 

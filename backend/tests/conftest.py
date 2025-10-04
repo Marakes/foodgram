@@ -11,7 +11,6 @@ from rest_framework.test import APIClient
 
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 
-
 User = get_user_model()
 
 
