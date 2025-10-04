@@ -63,12 +63,12 @@ const About = ({
             <h2 className={styles.additionalTitle}>Ссылки</h2>
             <div className={styles.card}>
               <div className={styles.linksRow}>
-                <span className={styles.muted}>Репозиторий: </span>
-                <a href={githubUrl} className={styles.textLink}>GitHub проекта</a>
+                <span className={styles.muted}>Репозиторий:</span>
+                <a href={githubUrl} className={styles.textLink}> GitHub проекта</a>
               </div>
               <div className={styles.linksRow}>
-                <span className={styles.muted}>Автор: </span>
-                <a href={authorUrl} className={styles.textLink}>{authorName}</a>
+                <span className={styles.muted}>Автор:</span>
+                <a href={authorUrl} className={styles.textLink}> {authorName}</a>
               </div>
             </div>
 
