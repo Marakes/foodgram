@@ -426,6 +426,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
                        rec_ing.ingredient.measurement_unit)
                 totals[key] += rec_ing.amount
 
+        def _fmt_amount(val: Decimal) -> str:
+            """Форматирует число без экспоненты и лишних нулей."""
+            s = format(val, 'f')  # гарантированно без 5E+1
+            if '.' in s:
+                s = s.rstrip('0').rstrip('.')
+            return s
+
         if not totals:
             content = 'Список покупок пуст, пора набирать!'
         else:
@@ -433,9 +440,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             for (name, unit), amount in sorted(
                     totals.items(), key=lambda x: x[0][0].lower()
             ):
-                amount_str = (f'{amount.normalize()}'
-                              if amount == amount.to_integral()
-                              else f'{amount}')
+                amount_str = _fmt_amount(amount)
                 lines.append(f'{name} ({unit}) - {amount_str}')
             content = '\n'.join(lines)
 
@@ -443,8 +448,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
             content, content_type='text/plain; charset=utf-8',
             status=status.HTTP_200_OK
         )
-        response['Content-Disposition'] = ('attachment; '
-                                           'filename="shopping_list.txt"')
+        response['Content-Disposition'] = (
+            'attachment; filename="shopping_list.txt"'
+        )
         return response
 
     def _helper_shop_fav(self, request, model_cls, name):
