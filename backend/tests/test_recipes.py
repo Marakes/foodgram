@@ -58,5 +58,9 @@ def test_favorite_and_cart_and_filters(auth, user, user2, tags, ingredients):
     assert r.id in ids
 
     # удаление
-    assert auth.delete(f"/api/recipes/{r.id}/favorite/").status_code == 204
-    assert auth.delete(f"/api/recipes/{r.id}/shopping_cart/").status_code == 204
+    assert auth.delete(
+        f"/api/recipes/{r.id}/favorite/"
+    ).status_code == 204
+    assert auth.delete(
+        f"/api/recipes/{r.id}/shopping_cart/"
+    ).status_code == 204

@@ -35,7 +35,9 @@ def test_users_me_returns_recipes(auth, user, user2, tags, ingredients):
 
 
 @pytest.mark.django_db
-def test_users_retrieve_anonymous_can_view_profile(api, user2, tags, ingredients):
+def test_users_retrieve_anonymous_can_view_profile(
+        api, user2, tags, ingredients
+):
     # у user2 есть рецепт; аноним может смотреть профиль с рецептами
     r = create_recipe(
         author=user2,
@@ -55,7 +57,7 @@ def test_users_retrieve_anonymous_can_view_profile(api, user2, tags, ingredients
 def test_subscribe_flow(auth, user, user2, tags, ingredients):
     # подписка
     resp = auth.post(f"/api/users/{user2.id}/subscribe/")
-    assert resp.status_code in (200, 201, 400)  # может быть 400 если уже подписан
+    assert resp.status_code in (200, 201, 400)
     # список подписок
     resp = auth.get("/api/users/subscriptions/")
     assert resp.status_code == 200

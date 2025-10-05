@@ -1,12 +1,5 @@
-# import base64
-# import io
-# import json
-# from pathlib import Path
-
 import pytest
 from django.contrib.auth import get_user_model
-# from django.core.files.base import ContentFile
-# from django.urls import reverse
 from rest_framework.test import APIClient
 
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
@@ -105,7 +98,9 @@ def ingredients(db):
     return [i1, i2]
 
 
-def create_recipe(*, author, name, ingredients, tags, image=None, text="txt", time=5):
+def create_recipe(
+        *, author, name, ingredients, tags, image=None, text="txt", time=5
+):
     """Хелпер для быстрого создания рецепта."""
     r = Recipe.objects.create(
         author=author,
@@ -116,5 +111,6 @@ def create_recipe(*, author, name, ingredients, tags, image=None, text="txt", ti
     )
     r.tags.set(tags)
     for ing, amount in ingredients:
-        RecipeIngredient.objects.create(recipe=r, ingredient=ing, amount=amount)
+        RecipeIngredient.objects.create(
+            recipe=r, ingredient=ing, amount=amount)
     return r
