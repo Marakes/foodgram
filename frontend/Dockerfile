@@ -1,13 +1,13 @@
-FROM node:22-alpine AS build
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --no-audit --no-fund --legacy-peer-deps
-COPY . .
-RUN npm run build
-
-FROM alpine:3.20
-WORKDIR /app
-COPY --from=build /app/build ./build
+#FROM node:22-alpine AS build
+#WORKDIR /app
+#COPY package*.json ./
+#RUN npm ci --no-audit --no-fund --legacy-peer-deps
+#COPY . .
+#RUN npm run build
+#
+#FROM alpine:3.20
+#WORKDIR /app
+#COPY --from=build /app/build ./build
 
 
 
@@ -25,6 +25,20 @@ COPY --from=build /app/build ./build
 #FROM alpine:3.20 AS runtime
 #WORKDIR /app
 #COPY --from=build /app/build ./build
+
+
+# build stage
+FROM node:18-alpine AS build
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --no-audit --no-fund --legacy-peer-deps
+COPY . .
+RUN npm run build
+
+# runtime (если нужно только отдать build)
+FROM alpine:3.20
+WORKDIR /app
+COPY --from=build /app/build ./build
 
 
 # build env
