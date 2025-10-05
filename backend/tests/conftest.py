@@ -14,6 +14,12 @@ from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 User = get_user_model()
 
 
+@pytest.fixture(autouse=True)
+def _temp_media(settings, tmp_path):
+    settings.MEDIA_ROOT = tmp_path / "media"
+    settings.MEDIA_ROOT.mkdir(parents=True, exist_ok=True)
+
+
 @pytest.fixture
 def api():
     """Анонимный API-клиент."""

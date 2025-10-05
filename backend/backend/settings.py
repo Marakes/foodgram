@@ -14,6 +14,9 @@ DEBUG = os.getenv('DEBUG', 'False').lower() in ('1', 'true')
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
+if 'PYTEST_CURRENT_TEST' in os.environ and 'testserver' not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append('testserver')
+
 CSRF_TRUSTED_ORIGINS = [
     *(o.strip() for o in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if o.strip()),
 ]
