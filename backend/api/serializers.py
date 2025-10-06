@@ -258,7 +258,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
     @transaction.atomic
     def _set_ingredients(self, recipe, ingredients_payload):
         """Полностью пересобирает состав ингредиентов рецепта."""
-        recipe.recipe_ingredients.delete()
+        recipe.recipe_ingredients.all().delete()
         bulk = [
             RecipeIngredient(
                 recipe=recipe,
