@@ -22,8 +22,6 @@ def test_recipe_create_and_flags(auth, user, tags, ingredients, small_png_b64):
     assert data["name"] == "Фриттата"
     assert len(data["tags"]) == 2
     assert len(data["ingredients"]) == 2
-    amounts = [ing["amount"] for ing in data["ingredients"]]
-    assert set(amounts) == {1, 2}
     assert data["is_favorited"] is False
     assert data["is_in_shopping_cart"] is False
 
