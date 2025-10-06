@@ -2,8 +2,6 @@ import pytest
 
 from .conftest import create_recipe
 
-# from recipes.models import Favorite, ShoppingCart
-
 
 @pytest.mark.django_db
 def test_recipe_create_and_flags(auth, user, tags, ingredients, small_png_b64):
@@ -13,8 +11,8 @@ def test_recipe_create_and_flags(auth, user, tags, ingredients, small_png_b64):
         "cooking_time": 15,
         "tags": [tags[0].id, tags[1].id],
         "ingredients": [
-            {"id": ingredients[0].id, "amount": "1.00"},
-            {"id": ingredients[1].id, "amount": "2.00"},
+            {"id": ingredients[0].id, "amount": 1},
+            {"id": ingredients[1].id, "amount": 2},
         ],
         "image": small_png_b64,
     }
@@ -24,6 +22,8 @@ def test_recipe_create_and_flags(auth, user, tags, ingredients, small_png_b64):
     assert data["name"] == "Фриттата"
     assert len(data["tags"]) == 2
     assert len(data["ingredients"]) == 2
+    amounts = [ing["amount"] for ing in data["ingredients"]]
+    assert set(amounts) == {1, 2}
     assert data["is_favorited"] is False
     assert data["is_in_shopping_cart"] is False
 

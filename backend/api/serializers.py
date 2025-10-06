@@ -1,64 +1,17 @@
 import base64
 from binascii import Error as B64Error
 from collections import Counter
-from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from django.db import transaction
 from rest_framework import serializers
 
+from recipes.constants import MAX_COUNT, MIN_COUNT
 from recipes.models import (Favorite, Ingredient, Recipe, RecipeIngredient,
                             ShoppingCart, Tag)
-from users.models import Subscribe
 
 User = get_user_model()
-
-
-# class ImageBase64(serializers.ImageField):
-#     """
-#     Поле для приёма изображений в Base64.
-#
-#     Поддерживает строки вида 'data:image/<ext>;base64,<payload>' и
-#     «голые» base64-данные. Декодирует в ContentFile и передаёт дальше
-#     стандартной валидации ImageField.
-#     """
-#
-#     def to_internal_value(self, data):
-#         """
-#         Преобразует входные base64-данные в файл-объект.
-#
-#         Возвращает:
-#             django.core.files.base.ContentFile: подготовленный файл.
-#
-#         Исключения:
-#             ValidationError: если строка не похожа на корректный base64
-#             или заголовок data URI составлен неверно.
-#         """
-#         if isinstance(data, str):
-#             ext = 'jpg'
-#             if data.startswith('data:image'):
-#                 try:
-#                     header, b64data = data.split(';base64,', 1)
-#                     ext = header.split('/')[-1].lower() or 'jpg'
-#                 except ValueError:
-#                     raise serializers.ValidationError(
-#                         'Не удалось обработать фото'
-#                     )
-#             else:
-#                 b64data = data
-#
-#             try:
-#                 decoded = base64.b64decode(b64data, validate=True)
-#             except (B64Error, ValueError):
-#                 raise serializers.ValidationError(
-#                     'Не удалось обработать фото'
-#                 )
-#
-#             file = ContentFile(decoded, name=f'upload.{ext}')
-#             return super().to_internal_value(file)
-#
-#         return super().to_internal_value(data)
 
 
 class ImageBase64(serializers.FileField):
@@ -153,17 +106,16 @@ class RecipeIngredientWriteSerializer(serializers.Serializer):
 
     Принимает:
         - id: PK ингредиента (поле 'ingredient')
-        - amount: Decimal >= 0.01
+        - amount: Int от 1 до 32000
     """
 
     id = serializers.PrimaryKeyRelatedField(
         queryset=Ingredient.objects.all(),
         source='ingredient'
     )
-    amount = serializers.DecimalField(
-        max_digits=8,
-        decimal_places=2,
-        min_value=Decimal('0.01')
+    amount = serializers.IntegerField(
+        min_value=MIN_COUNT,
+        max_value=MAX_COUNT
     )
 
 
@@ -257,7 +209,10 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
     )
     ingredients = RecipeIngredientWriteSerializer(many=True)
     image = ImageBase64(required=True)
-    cooking_time = serializers.IntegerField(min_value=1)
+    cooking_time = serializers.IntegerField(
+        min_value=MIN_COUNT,
+        max_value=MAX_COUNT
+    )
 
     class Meta:
         model = Recipe
@@ -303,7 +258,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
     @transaction.atomic
     def _set_ingredients(self, recipe, ingredients_payload):
         """Полностью пересобирает состав ингредиентов рецепта."""
-        RecipeIngredient.objects.filter(recipe=recipe).delete()
+        recipe.recipe_ingredients.delete()
         bulk = [
             RecipeIngredient(
                 recipe=recipe,
@@ -333,7 +288,6 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         author = request.user
 
         recipe = Recipe.objects.create(author=author, **validated_data)
-        # recipe = Recipe.objects.create(**validated_data)
         recipe.tags.set(tags)
         self._set_ingredients(recipe, ingredients_payload)
         return recipe
@@ -377,7 +331,6 @@ class SubscribeSerializer(serializers.ModelSerializer):
     """
 
     is_subscribed = serializers.SerializerMethodField()
-    # recipes = RecipeShortSerializer(source='recipes', many=True)
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
     avatar = serializers.ImageField(read_only=True)
@@ -395,7 +348,7 @@ class SubscribeSerializer(serializers.ModelSerializer):
         user = getattr(self.context.get('request'), 'user', None)
         if not user or not user.is_authenticated:
             return False
-        return Subscribe.objects.filter(user=user, author=obj).exists()
+        return user.subscriptions.filter(author=obj).exists()
 
     def get_recipes(self, obj):
         """
@@ -431,7 +384,6 @@ class UserReadSerializer(serializers.ModelSerializer):
     """
 
     is_subscribed = serializers.SerializerMethodField()
-    # avatar = serializers.ImageField(read_only=True)
     avatar = serializers.SerializerMethodField()
 
     class Meta:

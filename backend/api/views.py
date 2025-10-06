@@ -1,6 +1,5 @@
 import base64
 from collections import defaultdict
-from decimal import Decimal
 
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
@@ -17,7 +16,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from api.filters import IngredientUniversalSearchFilter, RecipeFilter
-from api.permissions import IsAdminOrReadOnly, IsAuthorOrAdminOrReadOnly
+from api.permissions import IsAuthorOrAdminOrReadOnly
 from api.serializers import (AvatarUpdateSerializer, IngredientSerializer,
                              RecipeReadSerializer, RecipeShortSerializer,
                              RecipeWriteSerializer, SubscribeSerializer,
@@ -25,7 +24,6 @@ from api.serializers import (AvatarUpdateSerializer, IngredientSerializer,
 from api.utils import generate_code
 from recipes.models import (Favorite, Ingredient, Recipe, ShoppingCart,
                             ShortLink, Tag)
-from users.models import Subscribe
 
 User = get_user_model()
 
@@ -33,13 +31,8 @@ User = get_user_model()
 class ReadOnlyBase(viewsets.ReadOnlyModelViewSet):
     """
     Базовый read-only viewset для справочников (теги, ингредиенты).
-
-    Разрешает только безопасные методы; права выдаются через
-    :class:`IsAdminOrReadOnly`. Пагинация отключена.
     """
 
-    # permission_classes = (IsAuthenticatedOrReadOnly, IsAdminOrReadOnly,)
-    permission_classes = (IsAdminOrReadOnly,)
     pagination_class = None
 
 
@@ -53,7 +46,6 @@ class IngredientViewSet(ReadOnlyBase):
 
     queryset = Ingredient.objects.all().order_by('name')
     serializer_class = IngredientSerializer
-    # permission_classes = (IsAuthenticatedOrReadOnly,)
     filter_backends = (IngredientUniversalSearchFilter,)
 
 
@@ -66,7 +58,6 @@ class TagViewSet(ReadOnlyBase):
 
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    # permission_classes = (IsAuthenticatedOrReadOnly,)
 
 
 class CustomUserViewSet(UserViewSet):
@@ -99,7 +90,7 @@ class CustomUserViewSet(UserViewSet):
         """
         Сериализует пользователя с префетчем его рецептов.
         """
-        recipes_qs = Recipe.objects.filter(author=user_obj).order_by('-id')
+        recipes_qs = user_obj.recipes.order_by('-id')
         user_with_recipes = (
             User.objects.filter(pk=user_obj.pk)
             .prefetch_related(Prefetch('recipes', queryset=recipes_qs))
@@ -181,28 +172,6 @@ class CustomUserViewSet(UserViewSet):
                 {'avatar': absolute_url}, status=status.HTTP_200_OK
             )
 
-        # if request.method == 'PUT':
-        #     if 'avatar' not in request.data:
-        #         return Response(
-        #             {'avatar': ['Это поле обязательное!']},
-        #             status=status.HTTP_400_BAD_REQUEST
-        #         )
-        #     try:
-        #         serializer = self.get_serializer(
-        #             user,
-        #             data=request.data,
-        #             # partial=False
-        #         )
-        #         serializer.is_valid(raise_exception=True)
-        #         serializer.save()
-        #     except ValidationError:
-        #         raise
-        #     except OSError:
-        #         raise ValidationError(
-        #             {'avatar': ['Не удалось обработать фото']}
-        #         )
-        #     return Response(serializer.data, status=status.HTTP_200_OK)
-
         if request.method == 'DELETE':
             if user.avatar:
                 user.avatar.delete(save=False)
@@ -233,13 +202,10 @@ class CustomUserViewSet(UserViewSet):
         """
         Список авторов, на которых подписан текущий пользователь.
         """
-        # recipes_limit = self._recipes_limit(request)
         base_qs = User.objects.filter(
             subscribers__user=request.user
         ).distinct().order_by('id')
         recipes_qs = Recipe.objects.order_by('-id')
-        # if recipes_limit is not None:
-        #     recipes_qs = recipes_qs[:recipes_limit]
         qs = base_qs.prefetch_related(
             Prefetch('recipes', queryset=recipes_qs)
         )
@@ -268,12 +234,12 @@ class CustomUserViewSet(UserViewSet):
             return Response({'detail': 'На себя подписаться нельзя!!!'},
                             status=status.HTTP_400_BAD_REQUEST)
 
-        exists = Subscribe.objects.filter(user=user, author=author).exists()
+        exists = user.subscriptions.filter(author=author).exists()
         if request.method == 'POST':
             if exists:
                 return Response({'detail': 'Подписка уже оформлена!'},
                                 status=status.HTTP_400_BAD_REQUEST)
-            Subscribe.objects.create(user=user, author=author)
+            user.subscriptions.create(author=author)
             recipes_limit = self._recipes_limit(request)
             recipes_qs = author.recipes.order_by('-id')
             if recipes_limit is not None:
@@ -292,7 +258,7 @@ class CustomUserViewSet(UserViewSet):
         if not exists:
             return Response({'detail': 'Вы не подписаны!'},
                             status=status.HTTP_400_BAD_REQUEST)
-        Subscribe.objects.filter(user=user, author=author).delete()
+        user.subscriptions.filter(author=author).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -303,7 +269,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     Поддерживает фильтрацию (django-filter), поиск и сортировку.
     """
 
-    # queryset = Recipe.objects.all()
     serializer_class = RecipeReadSerializer
     filter_backends = (
         DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter
@@ -335,9 +300,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         )
 
         if user and user.is_authenticated:
-            fav_ids = Favorite.objects.filter(user=user).values('recipe_id')
-            cart_ids = ShoppingCart.objects.filter(
-                user=user).values('recipe_id')
+            fav_ids = user.favorites.values('recipe_id')
+            cart_ids = user.cart_items.values('recipe_id')
 
             is_fav = request.query_params.get('is_favorited')
             if is_fav in ('1', 'true', 'True', True):
@@ -349,14 +313,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
             qs = qs.annotate(
                 _is_favorited=Exists(
-                    Favorite.objects.filter(
-                        user=user, recipe_id=OuterRef('pk')
-                    )
+                    user.favorites.filter(recipe_id=OuterRef('pk'))
                 ),
                 _is_in_cart=Exists(
-                    ShoppingCart.objects.filter(
-                        user=user, recipe_id=OuterRef('pk')
-                    )
+                    user.cart_items.filter(recipe_id=OuterRef('pk'))
                 ),
             )
         else:
@@ -413,25 +373,17 @@ class RecipeViewSet(viewsets.ModelViewSet):
             «ингредиент (ед.) — количество».
         """
         user = request.user
-
         recipes_qs = (
             self.get_queryset().filter(in_carts__user=user)
             .prefetch_related('recipe_ingredients__ingredient')
         )
-        totals = defaultdict(Decimal)
+        totals = defaultdict(int)
 
         for recipe in recipes_qs:
             for rec_ing in recipe.recipe_ingredients.all():
                 key = (rec_ing.ingredient.name,
                        rec_ing.ingredient.measurement_unit)
-                totals[key] += rec_ing.amount
-
-        def _fmt_amount(val: Decimal) -> str:
-            """Форматирует число без экспоненты и лишних нулей."""
-            s = format(val, 'f')  # гарантированно без 5E+1
-            if '.' in s:
-                s = s.rstrip('0').rstrip('.')
-            return s
+                totals[key] += int(rec_ing.amount)
 
         if not totals:
             content = 'Список покупок пуст, пора набирать!'
@@ -440,8 +392,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             for (name, unit), amount in sorted(
                     totals.items(), key=lambda x: x[0][0].lower()
             ):
-                amount_str = _fmt_amount(amount)
-                lines.append(f'{name} ({unit}) - {amount_str}')
+                lines.append(f'{name} ({unit}) - {amount}')
             content = '\n'.join(lines)
 
         response = HttpResponse(

@@ -1,25 +1,6 @@
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
-class IsAdminOrReadOnly(BasePermission):
-    """
-    Разрешения для админов и только чтения.
-
-    Поведение:
-        - Чтение (GET, HEAD, OPTIONS) доступно всем пользователям.
-        - Создание, обновление и удаление объектов доступны
-          только пользователям со статусом `is_staff`.
-    """
-
-    def has_permission(self, request, view):
-        if request.method in SAFE_METHODS:
-            return True
-        return (
-            request.user.is_authenticated
-            and request.user.is_staff
-        )
-
-
 class IsAuthorOrAdminOrReadOnly(BasePermission):
     """
     Разрешения для автора объекта, админов и только чтения.

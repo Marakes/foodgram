@@ -37,6 +37,7 @@ class User(AbstractUser):
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
+        ordering = ('username',)
 
     def __str__(self):
         return Truncator(self.username).chars(TRUNCATE_TEXT)
@@ -71,6 +72,7 @@ class Subscribe(models.Model):
     class Meta:
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
+        ordering = ('user__username',)
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'author'],

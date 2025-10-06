@@ -1,9 +1,9 @@
 from django.contrib.auth import get_user_model
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.utils.text import Truncator
 
-from recipes.constants import TRUNCATE_TEXT
+from recipes.constants import TRUNCATE_TEXT, MAX_COUNT, MIN_COUNT
 
 User = get_user_model()
 
@@ -87,9 +87,12 @@ class Recipe(models.Model):
         Tag,
         verbose_name='Теги'
     )
-    cooking_time = models.PositiveIntegerField(
+    cooking_time = models.PositiveSmallIntegerField(
         'Время приготовления в минутах',
-        validators=[MinValueValidator(1)]
+        validators=[
+            MinValueValidator(MIN_COUNT),
+            MaxValueValidator(MAX_COUNT)
+        ]
     )
 
     class Meta:
@@ -123,13 +126,16 @@ class RecipeIngredient(models.Model):
         related_name='ingredient_in_recipes',
         verbose_name='Ингредиент',
     )
-    amount = models.DecimalField(
+    amount = models.PositiveSmallIntegerField(
         'Количество',
-        max_digits=8, decimal_places=2,
-        validators=[MinValueValidator(0.01)]
+        validators=[
+            MinValueValidator(MIN_COUNT),
+            MaxValueValidator(MAX_COUNT)
+        ]
     )
 
     class Meta:
+        ordering = ('ingredient__name',)
         constraints = [
             models.UniqueConstraint(
                 fields=['recipe', 'ingredient'],
@@ -165,6 +171,7 @@ class Favorite(models.Model):
     class Meta:
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранные'
+        ordering = ('-id',)
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'recipe'],
@@ -200,6 +207,7 @@ class ShoppingCart(models.Model):
     class Meta:
         verbose_name = 'Корзина'
         verbose_name_plural = 'Корзины'
+        ordering = ('-id',)
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'recipe'],
@@ -236,6 +244,7 @@ class ShortLink(models.Model):
     class Meta:
         verbose_name = 'Короткая ссылка'
         verbose_name_plural = 'Короткие ссылки'
+        ordering = ('-created_at',)
 
     def __str__(self):
         return f'{self.code} -> {self.recipe}'
