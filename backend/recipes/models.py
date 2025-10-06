@@ -1,9 +1,9 @@
 from django.contrib.auth import get_user_model
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils.text import Truncator
 
-from recipes.constants import TRUNCATE_TEXT, MAX_COUNT, MIN_COUNT
+from recipes.constants import MAX_COUNT, MIN_COUNT, TRUNCATE_TEXT
 
 User = get_user_model()
 
