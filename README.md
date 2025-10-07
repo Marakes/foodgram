@@ -1,6 +1,9 @@
 ## Бейджик workflow: ##
 [![Main Foodgram workflow](https://github.com/Marakes/foodgram/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/Marakes/foodgram/actions/workflows/main.yml)
 
+Ссылка на сайт:
+https://amazingfoodgram.webhop.me
+
 
 ## Summary: ##
     Привет! 
