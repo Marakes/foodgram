@@ -1,7 +1,3 @@
-## Workflow: ##
-[![Main Foodgram workflow](https://github.com/Marakes/foodgram/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/Marakes/foodgram/actions/workflows/main.yml)
-
-
 # Foodgram
  
 A recipe sharing platform. Publish recipes, follow other cooks, and download a ready-made shopping list.  
